@@ -1,0 +1,167 @@
+https://forum.arduino.cc/t/problem-with-il9341-and-xpt2046-phantom-touch/688062
+
+//////////////////////
+/////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * XPT2046 Touch Screen Controller example.
+ * 
+ * Copyright (c) 02 Dec 2015 by Vassilis Serasidis
+ * Home: http://www.serasidis.gr
+ * email: avrsite@yahoo.gr
+ * 
+ * The sketch example has been created for using it with STM32Duino (http://stm32duinoforum.com/forum)
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+#include 
+#define csPin PA3
+#define Z_THRESHOLD   3500
+int xy[2];
+void setup() {
+  Serial1.begin(9600);
+  Serial1.println("-------------------------------------------------");
+  Serial1.println("XPT2046 example sketch");
+  Serial1.println("Copyright (c) 02 Dec 2015 by Vassilis Serasidis");
+  Serial1.println("Home: http://www.serasidis.gr");
+  Serial1.println("-------------------------------------------------");
+  SPI.begin(); //Initiallize the SPI1 port.
+  pinMode(csPin, OUTPUT);
+  digitalWrite(csPin, HIGH);
+}
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void loop() {
+  if(read_XY(xy)){     //Read the X,Y coordinates (12 bits, values 0-4095)
+    Serial1.print("X: ");
+    Serial1.println(xy[0]); //Print X value
+    Serial1.print("Y: ");
+    Serial1.println(xy[1]); //Print Y value
+    Serial1.println();
+    delay(1000);
+  }
+}
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+boolean read_XY(int *xy){
+  int z1, z2, tmpH, tmpL;
+  digitalWrite(csPin, LOW);
+  //Check if touch screen is pressed.
+  SPI.transfer(B10110001); // Z1
+  tmpH = (SPI.transfer(0) << 5);
+  tmpL = (SPI.transfer(0) >> 3);
+  z1 = tmpH | tmpL;
+  SPI.transfer(B11000001); // Z2
+  tmpH = (SPI.transfer(0) << 5);
+  tmpL = (SPI.transfer(0) >> 3);
+  z2 = tmpH | tmpL;
+  if((z2 - z1) < Z_THRESHOLD){ //If the touch screen is pressed, read the X,Y  coordinates from XPT2046.
+    SPI.transfer(B11010001); // X
+    tmpH = (SPI.transfer(0) << 5);
+    tmpL = (SPI.transfer(0) >> 3);
+    xy[0] =  tmpH | tmpL;
+    SPI.transfer(B10010001); // Y
+    tmpH = (SPI.transfer(0) << 5);
+    tmpL = (SPI.transfer(0) >> 3);
+    xy[1] =  tmpH | tmpL;
+    digitalWrite(csPin, HIGH);
+    return true;
+  }
+  digitalWrite(csPin, HIGH);
+  return false;
+}
+
+
+//////////////////////
+/////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+#include <Arduino.h>
+#include <SPI.h>
+ 
+#include <Adafruit_ILI9341esp.h>
+#include <Adafruit_GFX.h>
+#include <XPT2046.h>
+ 
+// For the ESP connection of Touch
+#define TFT_DC 2
+#define TFT_CS 15
+
+//SCREEN CONNECTIONS
+//VCC to 3.3V
+//GND to GND
+//CS to D8
+//RESET to RST
+//DC to D4
+//SDI (MOSI) to D7
+//SCK to D5
+//LED to 3.3V
+//SDD (MISO) to D6
+//TOUCH INTERFACE (ONLY IF TOUCH IS USED)
+//T_CLK to D5
+//T_CS to D2
+//T_DIN to D7
+//T_DO to D6
+//T_IRQ to D1
+
+ 
+Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+XPT2046 touch(/*cs=*/ 4, /*irq=*/ 5);
+ 
+static void calibratePoint(uint16_t x, uint16_t y, uint16_t &vi, uint16_t &vj) {
+  // Draw cross
+  tft.drawFastHLine(x - 8, y, 16,0xff);
+  tft.drawFastVLine(x, y - 8, 16,0xff);
+  while (!touch.isTouching()) {
+    delay(10);
+  }
+  touch.getRaw(vi, vj);
+  // Erase by overwriting with black
+  tft.drawFastHLine(x - 8, y, 16, 0);
+  tft.drawFastVLine(x, y - 8, 16, 0);
+}
+ 
+void calibrate() {
+  uint16_t x1, y1, x2, y2;
+  uint16_t vi1, vj1, vi2, vj2;
+  touch.getCalibrationPoints(x1, y1, x2, y2);
+  calibratePoint(x1, y1, vi1, vj1);
+  delay(1000);
+  calibratePoint(x2, y2, vi2, vj2);
+  touch.setCalibration(vi1, vj1, vi2, vj2);
+  
+  
+  tft.setTextColor(ILI9341_CYAN);
+  tft.setTextSize(2);
+  tft.println("Calibration Params");
+  tft.println("");
+  tft.setTextSize(3);
+  tft.println(vi1);
+  tft.println(vj1);
+  tft.println(vi2);
+  tft.println(vj2);
+}
+ 
+void setup() {
+  delay(1000);  
+  SPI.setFrequency(ESP_SPI_FREQ);
+  tft.begin();
+  touch.begin(tft.width(), tft.height());  // Must be done before setting rotation
+  tft.fillScreen(ILI9341_BLACK);  
+  calibrate();  // No rotation!!
+}
+ 
+void loop() {
+  // Do nothing
+  delay(1000);
+}
