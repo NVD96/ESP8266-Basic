@@ -1,0 +1,132 @@
+void Adafruit_GFX::drawCircle(int16_t x0, int16_t y0, int16_t r,
+                              uint16_t color) {
+#if defined(ESP8266)
+  yield();
+#endif
+  int16_t f = 1 - r;
+  int16_t ddF_x = 1;
+  int16_t ddF_y = -2 * r;
+  int16_t x = 0;
+  int16_t y = r;
+
+  startWrite();
+  writePixel(x0, y0 + r, color);
+  writePixel(x0, y0 - r, color);
+  writePixel(x0 + r, y0, color);
+  writePixel(x0 - r, y0, color);
+
+  while (x < y) {
+    if (f >= 0) {
+      y--;
+      ddF_y += 2;
+      f += ddF_y;
+    }
+    x++;
+    ddF_x += 2;
+    f += ddF_x;
+
+    writePixel(x0 + x, y0 + y, color);
+    writePixel(x0 - x, y0 + y, color);
+    writePixel(x0 + x, y0 - y, color);
+    writePixel(x0 - x, y0 - y, color);
+    writePixel(x0 + y, y0 + x, color);
+    writePixel(x0 - y, y0 + x, color);
+    writePixel(x0 + y, y0 - x, color);
+    writePixel(x0 - y, y0 - x, color);
+  }
+  endWrite();
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+void Adafruit_GFX::writePixel(int16_t x, int16_t y, uint16_t color) {
+  drawPixel(x, y, color);
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+void Adafruit_SPITFT::drawPixel(int16_t x, int16_t y, uint16_t color) {
+  // Clip first...
+  if ((x >= 0) && (x < _width) && (y >= 0) && (y < _height)) {
+    // THEN set up transaction (if needed) and draw...
+    startWrite();
+    setAddrWindow(x, y, 1, 1);
+    SPI_WRITE16(color);
+    endWrite();
+  }
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+void Adafruit_SPITFT::startWrite(void) {
+  SPI_BEGIN_TRANSACTION();
+  if (_cs >= 0)
+    SPI_CS_LOW();
+}
+///////////////
+void Adafruit_SPITFT::endWrite(void) {
+  if (_cs >= 0)
+    SPI_CS_HIGH();
+  SPI_END_TRANSACTION();
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void Adafruit_ILI9341::setAddrWindow(uint16_t x1, uint16_t y1, uint16_t w,
+                                     uint16_t h) {
+  static uint16_t old_x1 = 0xffff, old_x2 = 0xffff;
+  static uint16_t old_y1 = 0xffff, old_y2 = 0xffff;
+
+  uint16_t x2 = (x1 + w - 1), y2 = (y1 + h - 1);
+  if (x1 != old_x1 || x2 != old_x2) {
+    writeCommand(ILI9341_CASET); // Column address set
+    SPI_WRITE16(x1);
+    SPI_WRITE16(x2);
+    old_x1 = x1;
+    old_x2 = x2;
+  }
+  if (y1 != old_y1 || y2 != old_y2) {
+    writeCommand(ILI9341_PASET); // Row address set
+    SPI_WRITE16(y1);
+    SPI_WRITE16(y2);
+    old_y1 = y1;
+    old_y2 = y2;
+  }
+  writeCommand(ILI9341_RAMWR); // Write to RAM
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void Adafruit_SPITFT::SPI_WRITE16(uint16_t w) {
+  if (connection == TFT_HARD_SPI) {
+#if defined(__AVR__)
+    AVR_WRITESPI(w >> 8);
+    AVR_WRITESPI(w);
+#elif defined(ESP8266) || defined(ESP32)
+    hwspi._spi->write16(w);
+#elif defined(ARDUINO_ARCH_RP2040)
+    spi_inst_t *pi_spi = hwspi._spi == &SPI ? spi0 : spi1;
+    w = __builtin_bswap16(w);
+    spi_write_blocking(pi_spi, (uint8_t *)&w, 2);
+#else
+    // MSB, LSB because TFTs are generally big-endian
+    hwspi._spi->transfer(w >> 8);
+    hwspi._spi->transfer(w);
+#endif
+  } else if (connection == TFT_SOFT_SPI) {
+    for (uint8_t bit = 0; bit < 16; bit++) {
+      if (w & 0x8000)
+        SPI_MOSI_HIGH();
+      else
+        SPI_MOSI_LOW();
+      SPI_SCK_HIGH();
+      SPI_SCK_LOW();
+      w <<= 1;
+    }
+  } else { // TFT_PARALLEL
+#if defined(__AVR__)
+    *tft8.writePort = w >> 8;
+    TFT_WR_STROBE();
+    *tft8.writePort = w;
+#elif defined(USE_FAST_PINIO)
+    if (!tft8.wide) {
+      *tft8.writePort = w >> 8;
+      TFT_WR_STROBE();
+      *tft8.writePort = w;
+    } else {
+      *(volatile uint16_t *)tft8.writePort = w;
+    }
+#endif
+    TFT_WR_STROBE();
+  }
+}

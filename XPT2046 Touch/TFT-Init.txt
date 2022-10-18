@@ -1,0 +1,305 @@
+void Adafruit_ILI9341::begin(uint32_t freq) {
+
+  if (!freq)
+    freq = SPI_DEFAULT_FREQ;
+  initSPI(freq);
+
+  if (_rst < 0) {                 // If no hardware reset pin...
+    sendCommand(ILI9341_SWRESET); // Engage software reset
+    delay(150);
+  }
+
+  uint8_t cmd, x, numArgs;
+  const uint8_t *addr = initcmd;
+  while ((cmd = pgm_read_byte(addr++)) > 0) {//THUC HIEN LENH XONG MOI TANG 1 ADDR
+    x = pgm_read_byte(addr++);
+    numArgs = x & 0x7F;       //	LAY SO BYTE GIA TRI CUA COMMAND
+    sendCommand(cmd, addr, numArgs);
+    addr += numArgs;
+    if (x & 0x80)				//XOA GIA TRI X
+      delay(150);
+  }
+
+  _width = ILI9341_TFTWIDTH;
+  _height = ILI9341_TFTHEIGHT;
+}
+////////////////////////////////////////////////////////////////////////////////////////////////
+static const uint8_t PROGMEM initcmd[] = {
+  0xEF, 3, 0x03, 0x80, 0x02,
+  0xCF, 3, 0x00, 0xC1, 0x30,
+  0xED, 4, 0x64, 0x03, 0x12, 0x81,
+  0xE8, 3, 0x85, 0x00, 0x78,
+  0xCB, 5, 0x39, 0x2C, 0x00, 0x34, 0x02,
+  0xF7, 1, 0x20,
+  0xEA, 2, 0x00, 0x00,
+  ILI9341_PWCTR1  , 1, 0x23,             // Power control VRH[5:0]
+  ILI9341_PWCTR2  , 1, 0x10,             // Power control SAP[2:0];BT[3:0]
+  ILI9341_VMCTR1  , 2, 0x3e, 0x28,       // VCM control
+  ILI9341_VMCTR2  , 1, 0x86,             // VCM control2
+  ILI9341_MADCTL  , 1, 0x48,             // Memory Access Control
+  ILI9341_VSCRSADD, 1, 0x00,             // Vertical scroll zero
+  ILI9341_PIXFMT  , 1, 0x55,
+  ILI9341_FRMCTR1 , 2, 0x00, 0x18,
+  ILI9341_DFUNCTR , 3, 0x08, 0x82, 0x27, // Display Function Control
+  0xF2, 1, 0x00,                         // 3Gamma Function Disable
+  ILI9341_GAMMASET , 1, 0x01,             // Gamma curve selected
+  ILI9341_GMCTRP1 , 15, 0x0F, 0x31, 0x2B, 0x0C, 0x0E, 0x08, // Set Gamma
+    0x4E, 0xF1, 0x37, 0x07, 0x10, 0x03, 0x0E, 0x09, 0x00,
+  ILI9341_GMCTRN1 , 15, 0x00, 0x0E, 0x14, 0x03, 0x11, 0x07, // Set Gamma
+    0x31, 0xC1, 0x48, 0x08, 0x0F, 0x0C, 0x31, 0x36, 0x0F,
+  ILI9341_SLPOUT  , 0x80,                // Exit Sleep
+  ILI9341_DISPON  , 0x80,                // Display on
+  0x00                                   // End of list
+};
+///////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void Adafruit_SPITFT::sendCommand(uint8_t commandByte, uint8_t *dataBytes,
+                                  uint8_t numDataBytes) {
+  SPI_BEGIN_TRANSACTION();
+  if (_cs >= 0)
+    SPI_CS_LOW();									// SEND HET 1 LAN
+
+  SPI_DC_LOW();          // Command mode
+  spiWrite(commandByte); // Send the command byte
+
+  SPI_DC_HIGH();
+  for (int i = 0; i < numDataBytes; i++) {
+    if ((connection == TFT_PARALLEL) && tft8.wide) {
+      SPI_WRITE16(*(uint16_t *)dataBytes);
+      dataBytes += 2;
+    } else {
+      spiWrite(*dataBytes); // Send the data bytes
+      dataBytes++;
+    }
+  }
+
+  if (_cs >= 0)
+    SPI_CS_HIGH();
+  SPI_END_TRANSACTION();
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+inline void Adafruit_SPITFT::SPI_BEGIN_TRANSACTION(void) {
+  if (connection == TFT_HARD_SPI) {
+#if defined(SPI_HAS_TRANSACTION)
+    hwspi._spi->beginTransaction(hwspi.settings);
+#else // No transactions, configure SPI manually...
+#if defined(__AVR__) || defined(TEENSYDUINO) || defined(ARDUINO_ARCH_STM32F1)
+    hwspi._spi->setClockDivider(SPI_CLOCK_DIV2);
+#elif defined(__arm__)
+    hwspi._spi->setClockDivider(11);
+#elif defined(ESP8266) || defined(ESP32)
+    hwspi._spi->setFrequency(hwspi._freq);
+#elif defined(RASPI) || defined(ARDUINO_ARCH_STM32F1)
+    hwspi._spi->setClock(hwspi._freq);
+#endif
+    hwspi._spi->setBitOrder(MSBFIRST);
+    hwspi._spi->setDataMode(hwspi._mode);
+#endif // end !SPI_HAS_TRANSACTION
+  }
+}
+//////////////////////////////////////////////////////////////////////////////////////////
+inline void Adafruit_SPITFT::SPI_END_TRANSACTION(void) {
+#if defined(SPI_HAS_TRANSACTION)
+  if (connection == TFT_HARD_SPI) {
+    hwspi._spi->endTransaction();
+  }
+#endif
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+void SPI_CS_HIGH(void) {
+#if defined(USE_FAST_PINIO)
+#if defined(HAS_PORT_SET_CLR)
+#if defined(KINETISK)
+    *csPortSet = 1;
+#else  // !KINETISK
+    *csPortSet = csPinMask;
+#endif // end !KINETISK
+#else  // !HAS_PORT_SET_CLR
+    *csPort |= csPinMaskSet;
+#endif // end !HAS_PORT_SET_CLR
+#else  // !USE_FAST_PINIO
+    digitalWrite(_cs, HIGH);
+#endif // end !USE_FAST_PINIO
+  }
+ ///////////////////////////////////////////////////////////////////////////////////////////////
+ void SPI_CS_LOW(void) {
+#if defined(USE_FAST_PINIO)
+#if defined(HAS_PORT_SET_CLR)
+#if defined(KINETISK)
+    *csPortClr = 1;
+#else  // !KINETISK
+    *csPortClr = csPinMask;
+#endif // end !KINETISK
+#else  // !HAS_PORT_SET_CLR
+    *csPort &= csPinMaskClr;
+#endif // end !HAS_PORT_SET_CLR
+#else  // !USE_FAST_PINIO
+    digitalWrite(_cs, LOW);
+#endif // end !USE_FAST_PINIO
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  void SPI_DC_HIGH(void) {
+#if defined(USE_FAST_PINIO)
+#if defined(HAS_PORT_SET_CLR)
+#if defined(KINETISK)
+    *dcPortSet = 1;
+#else  // !KINETISK
+    *dcPortSet = dcPinMask;
+#endif // end !KINETISK
+#else  // !HAS_PORT_SET_CLR
+    *dcPort |= dcPinMaskSet;
+#endif // end !HAS_PORT_SET_CLR
+#else  // !USE_FAST_PINIO
+    digitalWrite(_dc, HIGH);
+#endif // end !USE_FAST_PINIO
+  }
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+ void SPI_DC_LOW(void) {
+#if defined(USE_FAST_PINIO)
+#if defined(HAS_PORT_SET_CLR)
+#if defined(KINETISK)
+    *dcPortClr = 1;
+#else  // !KINETISK
+    *dcPortClr = dcPinMask;
+#endif // end !KINETISK
+#else  // !HAS_PORT_SET_CLR
+    *dcPort &= dcPinMaskClr;
+#endif // end !HAS_PORT_SET_CLR
+#else  // !USE_FAST_PINIO
+    digitalWrite(_dc, LOW);
+#endif // end !USE_FAST_PINIO
+  }
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
+  void Adafruit_SPITFT::spiWrite(uint8_t b) {
+  if (connection == TFT_HARD_SPI) {
+#if defined(__AVR__)
+    AVR_WRITESPI(b);
+#elif defined(ESP8266) || defined(ESP32)
+    hwspi._spi->write(b);
+#elif defined(ARDUINO_ARCH_RP2040)
+    spi_inst_t *pi_spi = hwspi._spi == &SPI ? spi0 : spi1;
+    spi_write_blocking(pi_spi, &b, 1);
+#else
+    hwspi._spi->transfer(b);
+#endif
+  } else if (connection == TFT_SOFT_SPI) {
+    for (uint8_t bit = 0; bit < 8; bit++) {
+      if (b & 0x80)
+        SPI_MOSI_HIGH();
+      else
+        SPI_MOSI_LOW();
+      SPI_SCK_HIGH();
+      b <<= 1;
+      SPI_SCK_LOW();
+    }
+  } else { // TFT_PARALLEL
+#if defined(__AVR__)
+    *tft8.writePort = b;
+#elif defined(USE_FAST_PINIO)
+    if (!tft8.wide)
+      *tft8.writePort = b;
+    else
+      *(volatile uint16_t *)tft8.writePort = b;
+#endif
+    TFT_WR_STROBE();
+  }
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+void Adafruit_SPITFT::SPI_WRITE16(uint16_t w) {
+  if (connection == TFT_HARD_SPI) {
+#if defined(__AVR__)
+    AVR_WRITESPI(w >> 8);
+    AVR_WRITESPI(w);
+#elif defined(ESP8266) || defined(ESP32)
+    hwspi._spi->write16(w);
+#elif defined(ARDUINO_ARCH_RP2040)
+    spi_inst_t *pi_spi = hwspi._spi == &SPI ? spi0 : spi1;
+    w = __builtin_bswap16(w);
+    spi_write_blocking(pi_spi, (uint8_t *)&w, 2);
+#else
+    // MSB, LSB because TFTs are generally big-endian
+    hwspi._spi->transfer(w >> 8);
+    hwspi._spi->transfer(w);
+#endif
+  } else if (connection == TFT_SOFT_SPI) {
+    for (uint8_t bit = 0; bit < 16; bit++) {
+      if (w & 0x8000)
+        SPI_MOSI_HIGH();
+      else
+        SPI_MOSI_LOW();
+      SPI_SCK_HIGH();
+      SPI_SCK_LOW();
+      w <<= 1;
+    }
+  } else { // TFT_PARALLEL
+#if defined(__AVR__)
+    *tft8.writePort = w >> 8;
+    TFT_WR_STROBE();
+    *tft8.writePort = w;
+#elif defined(USE_FAST_PINIO)
+    if (!tft8.wide) {
+      *tft8.writePort = w >> 8;
+      TFT_WR_STROBE();
+      *tft8.writePort = w;
+    } else {
+      *(volatile uint16_t *)tft8.writePort = w;
+    }
+#endif
+    TFT_WR_STROBE();
+  }
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+void Adafruit_SPITFT::drawPixel(int16_t x, int16_t y, uint16_t color) {
+  // Clip first...
+  if ((x >= 0) && (x < _width) && (y >= 0) && (y < _height)) {
+    // THEN set up transaction (if needed) and draw...
+    startWrite();
+    setAddrWindow(x, y, 1, 1);
+    SPI_WRITE16(color);
+    endWrite();
+  }
+}
+//////////////
+////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void Adafruit_SPITFT::startWrite(void) {
+  SPI_BEGIN_TRANSACTION();
+  if (_cs >= 0)
+    SPI_CS_LOW();
+}
+///////////////
+void Adafruit_SPITFT::endWrite(void) {
+  if (_cs >= 0)
+    SPI_CS_HIGH();
+  SPI_END_TRANSACTION();
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void Adafruit_ILI9341::setAddrWindow(uint16_t x1, uint16_t y1, uint16_t w,
+                                     uint16_t h) {
+  static uint16_t old_x1 = 0xffff, old_x2 = 0xffff;
+  static uint16_t old_y1 = 0xffff, old_y2 = 0xffff;
+
+  uint16_t x2 = (x1 + w - 1), y2 = (y1 + h - 1);
+  if (x1 != old_x1 || x2 != old_x2) {
+    writeCommand(ILI9341_CASET); // Column address set
+    SPI_WRITE16(x1);
+    SPI_WRITE16(x2);
+    old_x1 = x1;
+    old_x2 = x2;
+  }
+  if (y1 != old_y1 || y2 != old_y2) {
+    writeCommand(ILI9341_PASET); // Row address set
+    SPI_WRITE16(y1);
+    SPI_WRITE16(y2);
+    old_y1 = y1;
+    old_y2 = y2;
+  }
+  writeCommand(ILI9341_RAMWR); // Write to RAM
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void Adafruit_SPITFT::writeCommand(uint8_t cmd) {
+  SPI_DC_LOW();
+  spiWrite(cmd);
+  SPI_DC_HIGH();
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
