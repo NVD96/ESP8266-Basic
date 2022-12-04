@@ -27,17 +27,19 @@ void loop() {
 
  WiFiClient client = server.available();
   // wait for a client (web browser) to connect
-  if (client)                                     //Khi chay lenh if(client) phai delay roi moi chay lenh client.available()  NEU KHONG CO HAM DELAY SE BI XUNG DOT VA KHONG CHAY DUOC CODE
-  {
-    delay(50);
-    while (client.available()) {
-       Serial.write(client.read());
-    }
-    while (Serial.available()) {
-       client.write(Serial.read());
-    }
+  //if (client)                                     //Khi chay lenh if(client) phai delay roi moi chay lenh client.available()  NEU KHONG CO HAM DELAY SE BI XUNG DOT VA KHONG CHAY DUOC CODE
+  
+    while(client){
+        delay(50);
+        while (client.available()) {
+           Serial.write(client.read());
+        }
+        while (Serial.available()) {
+           client.write(Serial.read());
+        }
+      }  
     // close the connection:
     client.stop();
 
-  } 
+   
 }
