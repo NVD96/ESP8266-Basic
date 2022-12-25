@@ -1,1 +1,27 @@
 https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=72
+////////////////////
+es it will work.
+Some days ago a wired my EPSON to the arduino and it works very well
+For you do the test here is my code:
+
+void setup ()
+{
+Serial.begin(19200); //Epson default printer settings for baud rate
+}
+
+void loop() //looping sequence
+{
+printFromAtoZ();
+delay(1000);                         //delay for 1 second
+}
+void printFromAtoZ()
+{
+unsigned char caracter = 'A';  
+Serial.write(0x1B);             //ESC POS command
+Serial.print('@');                   //ESC POS initialize followed after command
+for(uint8_t i = 0; i<=25;i++){
+  Serial.write(caracter++);
+}
+Serial.write(0xA);                    //Print and Line Feed from Buffer
+}
+All you need to wire is TX RX though a MAX232 and Ground
