@@ -1,3 +1,5 @@
 https://tuhoctin.net/lap-trinh/co-ban/c-cpp.html
 https://docs.oracle.com/cd/A83908_02/NT816EE/DOC/nt.816/a73028/toc.htm
+https://www.tenouk.com/visualcplusmfc/visualcplusmfc1.html
+https://learn.microsoft.com/en-us/windows/win32/learnwin32/learn-to-program-for-windows
 
