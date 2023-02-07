@@ -1,0 +1,34 @@
+TEST:		MOV B,#08H		; Load counter 8dec 
+		MOV A,DEN		; Load Acc with Divisor (Denominator)
+		CLR C			; Clear Carry
+		SUBB A,NUM_H		; If NUM_H greater than DEN,
+		JC EXIT			; Exit, result won't fit in 8bit reg
+		CLR C			; Clear Carry
+
+DIVIDE:		MOV A,NUM_L		; Load Acc with NUM_L
+		RLC A			; x 2
+		MOV NUM_L,A		; Save new value back NUM_L
+		MOV A,NUM_H		; Load Acc with NUM_H
+		RLC A			; x 2
+		MOV NUM_H,A		; Save new value back NUM_H
+		JC SUBTRACT		; Jump Carry
+		MOV A,DEN		; Load Acc with DEN
+		SUBB A,NUM_H		; Compare if DEN > NUM_H
+		JNC NEXT		; NUM_H < than DEN 
+		CLR C			; Clear Carry
+ 		
+SUBTRACT:	MOV A,NUM_H		; Load Acc with NUM_H
+		SUBB A,DEN		; Subtract DEN from NUM_H
+		MOV NUM_H,A		; Save NUM_H back
+		SETB C			; Set Carry (Divide one time)
+
+NEXT:		DJNZ B,DIVIDE		; Decrease pointer 		
+		MOV A,NUM_L		; Load Acc with NUM_L (quotient with C)
+		RLC A			; Shift out Carry
+		MOV Q,A			; Get the quotient
+
+EXIT:           RET                     ;
+////////////////////////////
+//////////////////////////
+mình làm theo giải thuật này nè:
+chia thực chất là trừ thôi, bạn viết 1 chương trình trừ 2 số 16bit, cái này chắc là dễ với bạn phải ko? khi muốn chia 2 số 16 bit hoặc chia 1 só 16 bit cho 1 số 8bit chỉ cần cho 2 số này trừ với nhau, mỗi lần trừ thì kết quả tăng lên 1 rồi kiểm tra kết quả có bị tràn ko, nếu tràn thì tăng byte cao của kết quả lên 1, đến khi trừ hết được thì kết quả là thương đấy và số thứ nhất chính là số dư
