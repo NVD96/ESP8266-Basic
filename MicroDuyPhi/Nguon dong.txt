@@ -1,0 +1,7 @@
+ai giải thích dùm mình hiện tượng này dc ko,mình cấp nguồn dòng 20mA vào điện trở 2k thì dòng đo đc trong mạch là 6mA
+tương tự như vậy cấp 20mA vào 1,5k thì đo đc 8mA, cấp vào 1k thì đo đc 12mA,vào 500 ohm thì đo đc 20mA,và cấp vào dưới 500 ohm thì cũng đo đc 20mA.
+Mình cứ nghĩ là nguồn dòng cấp vào mạch bao nhiêu thì đo đc bấy nhiêu chứ ( mình ko chuyên về điện tử lắm),các pro giải thích giúp mình với
+Thật khó hiểu với những câu hỏi mà ko đầu khong đuôi thế này. Câu hỏi thiếu giả thuyết thì sao trả lời đc?
+Thứ nhất 1: Nếu bạn dùng nguồn có núm vặn Amp thì đó không phải là dòng điện cấp cho mạch mà phải hiểu là dòng điện tối đa mà nguồn đó sẽ đáp ứng đc. Do đó bạn vặn 20ma thì khi đưa các giá trị điện trở khác nhau thì có amp khác nhau, và khi quá tải nó cũng ở mức Max đó thôi.
+
+Thứ 2: NẾu bạn dùng nguồn dòng, tức là dòng ổn định thì dù đưa các giá trị nào nó cũng sẽ cho bạn 1 giá trị amp như nhau mà thôi. dĩ nhiên trong tầm cho phép của nó chứ không phải sô lô a lê hấp, giá trị nào cho vô cũng đúng hết.

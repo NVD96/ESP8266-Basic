@@ -1,0 +1,192 @@
+Bác Hoang_Hai chắc nhầm ở đâu đó rồi!
+Đọc qua 1 hồi thấy bác bị rối rối lên sao sao đó ở chỗ mảng.
+
+Ý bác là muốn 1 mảng data trở thành 1 mảng bit?
+Hay dịch 1 mảng 16 phần tử khi dịch thì 16 phần tử này cùng dịch?
+Nếu muốn dịch 1 cái mà 16 phần tử này cùng dịch cũng ko phải là chuyện khó đâu. Dễ thôi, xem lại chỗ struct và union. khi đó dịch 1 khối ví dụ có 80 phần tử tương đương 1 bảng 80 cộtx 8 thì dịch 1 phần tử trên đó là dịch luôn 80 phần tử.
+Chốt ah, tức là dùng IC chốt ví dụ: 74573 chốt data trên led, lúc đó tốc độ cực kỳ nhanh có thể nói là ko gì nhanh bằng.
+Thời gian đáp ứng cực nhanh. Do đó khả năng mở rộng bảng đèn là rất lớn gấp gấp nhiều lần so với dùng phương pháp thông thường như dùng 74595 hay 4094.....
+Dễ lắm bạn, 4 con 8051 nối với nhau cũng như 4 anh em mình ngồi nói chuyện với nhau vậy thôi!
+
+Cái này là mình cũng đã làm rồi và rất thành công
+Lúc trc qua dien dan dien tu có 1 thầy ở đại học Vinh nhờ mình viết lại chtrinh bảng đèn 2x3m dùng 5 con AT89C51 và 1 con PC104 làm master.
+
+Minh nghĩ bạn này dùng cách như trên để kết nối thôi!
+
+Còn mạch 1,7M là rẽ đó. Vì họ làm choiêngf bạn mà, chứ đâu làm hàng loạt mà có giá rẽ đc. tính chi phí mạch, đặt mạch, công, linh kiện.... là đã đủ tiền rồi bạn ah!
+
+Tối đa có thể lên đến gần 1024 cột. Riêng cho 89C51 thôi thì cũng đã đạt lên mức 512 cột rồi! Cái này tôi không nói đùa đâu!
+Tuy nhiên càng nhiều cột thì càng khó làm, vì nhiễu bảng lớn rất khó mà xử lý. Thật đau đầu vấn đề nhiểu nhọt.
+Mình dùng ASM nên tốc độ vô cùng tối ưu, dùng C thì anh không chắc đạt đến mức tối đa đó.
+
+Chỉ dùng 1 VXL thôi mà làm được 1024 cột? Wow!!!
+Nhưng tôi chưa biết nhiều về nhiễu. Chỉ mới làm được 1 bảng 64 cột, không hề thấy nhiễu, nếu 128 cột thì dùng 2 con VXL 8951.
+Mới qua AVR, thấy tốc độ của nó cao quá, chắc là làm được nhiều thứ, nếu làm bảng lớn, khoảng 1024 cột thì chắc là có nhiễu, xin bác chút kinh nghiệm.
+À, hình như bác ở TPHCM, cho hỏi luôn, tôi định mua bảng led outdoor đa màu (16*16), chỗ bác có không, giá bao nhiêu, sơ đồ, cách điều khiển?
+Và hỏi luôn, nếu dùng Atmega128 có thể làm bảng led Video đa màu động khoảng 1,5 mét * 2 mét không? Có cần thêm kỹ thuật gì khác không.
+Cám ơn nhiều!
+
+
+Org 00h
+Tắt led
+Nếu F1 nhấn : tắt led
+Nếu Nhấn F2: thì cho led sáng 10s rồi tắt
+Nếu Nhấn F3: led sáng nhấp nháy (2s sáng, 1s tắt)
+
+quay lại từ đầu
+End.
+
+
+
+1. các bảng quang báo trên thị trường không phải là chiều cao nhỏ, chiều dài rất dài mà đó là do nhu cầu của người sử dụng. bảng càng dài thì càng hiển thị được nhiều thông tin. còn chiều cao chỉ là để thể hiện kích thước của chữ.
+nếu khách hàng có yêu cầu đặt một bảng hình vuông thì vẫn làm được thôi vấn đề là làm ra để thể hiện thông tin gì trên đó.
+2. tại một thời điểm không nhất thiết chỉ chỉ có 1 hàng led được sáng. nếu bảng của bạn cao 16 điểm ảnh thì tại 1 thời điểm có thể sáng 1, 2, 4 8, 16 hàng vẫn được, chứ ko ai ép bạn phải sáng 1 hàng.
+3. về công suất không phải số hàng ít là dẫn đến số tần công suất cũng ít mà vì quét hàng tần số quét thấp nên thời gian led sáng lớn nên led sáng mạnh do đó ta không cần khuếch đại dòng quá cao. tùy theo độ dài của bảng mà ta có thể chia ra nhiều modul để khuếch đại. khi modul nào bị hỏng thì cũng đễ thay thế và đỡ tốn tiền hơn.
+Đúng, chính xác là vậy.
+Thông thường yếu cơ chơi 1 đến 16
+Muốn tăng tốc và tiết kiệm chi phí thì chơi 1-8( quyét đồng thời 1-8, 2-9,...) hoặc 1-4, cái này Hàn quốc hay chơi kiểu này. Còn 1-2 thì chưa thấy qua!
+Hôm nào về nha trang ghé Quy Nhơn anh em làm cốc cafe nhé???
+
+Em mới làm quen với ASM nên không biêt phải sửa ở đâu.
+Vậy anh có thể nói chi tiết hơn được không ah.
+Em đã chạy led thành công nên giờ muốn thêm nút điều khiên cho vui ấy mà.
+
+org 0000h
+mov sp,#30h ; Tro con tro toi vung nho 30h
+mov dph,#01h ; Tro toi vung du lieu
+mov p3,#0ffh ; Chon cong dieu khien
+;===========================
+start:
+mov r2,#00h ; Tang dia chi quet
+lap2:
+mov r0,#30 ; Lap lai 30 lan, tao do luu anh
+lap1:
+mov 05h,02h
+; Set bit ab
+SETB P3.1
+mov r1,#60 ; Tong so cot cua ma tran
+lap:
+clr A
+mov dpl,r5 ; Tro toi cac trang thai
+movc A,@A+dptr
+mov p1,A
+; Tao xung clock
+SETB P3.0
+acall delay
+CLR P3.0
+CLR P3.1
+acall cho ; Tao do luu anh
+inc r5
+djnz r1,lap
+djnz r0,lap1
+INC R2
+cjne r2,#144,lap2 ; Tong cac trang thai
+JMP START
+
+;===========================
+
+delay:
+mov r4,#10
+DJNZ r4,$
+ret
+
+;===========================
+cho:
+mov r6,#01h
+w1: mov r7,#30h
+djnz r7,$
+djnz r6,w1
+ret
+
+.
+..
+end
+
+Chỗ tạo xung ko cần delay lâu như vậy, chỉ cần 1 - 2 lệnh Nop là ok rồi! Để tiết kiệm khả năng xử lý cho MCU.
+
+- Nếu bạn quét cột thì phần dòng ra hàng không cần bàn, nhưng nếu là quét hàng thì đó là vấn đề khác rồi.
+- Như bạn nói nếu quét cột mà nối thẳng catot của cac led lên chân 595 thì liệu có ổn không? Theo tôi nó chỉ ổn với kiểu quét hàng thôi, còn nếu quét cột thì cần phải xem lại, ở đây đang bàn đến kiểu quét cột mà.
+thế bác thấy quét hàng và quét cột cái nào hiệu quả hơn.
+để làm cho hiệu quả thì nên chọn hướng đi từ đầu. đừng nên làm xong rồi thấy ko đạt thì mới quay đầu lại thì muộn lắm.
+để làm bảng kích thước lớn thì chỉ có thể quét hàng thôi.
+tuy nhiên bọn trung quốc nhiều khi chúng làm ko cần quét gì cả. thế mà vẫn đẹp như tiên
+
+mạch trên vừa có thể quét hàng vừa có thể quét cột. nếu quét hàng có thể bỏ 2803, có thể bỏ điện trở tại chân c của 1015. nhưng mạch trên vẫn chưa đảm bảo chất lượng ảnh khi cho dòng chữ chạy qua (nếu quét cột) chạy từ trên xuống (nếu quét hàng) vì theo mạch trên thì a1015 vẫn chưa đóng hoàn toàn (khi đèn tắt thì vẫn còn lú sáng)
+
+Trích:
+thế bác thấy quét hàng và quét cột cái nào hiệu quả hơn.
+để làm cho hiệu quả thì nên chọn hướng đi từ đầu. đừng nên làm xong rồi thấy ko đạt thì mới quay đầu lại thì muộn lắm.
+để làm bảng kích thước lớn thì chỉ có thể quét hàng thôi.
+tuy nhiên bọn trung quốc nhiều khi chúng làm ko cần quét gì cả. thế mà vẫn đẹp như tiên
+Tất nhiên là quét hàng thì có khả năng ứng dụng cao hơn, ứng dụng với những bảng quang báo lơn, nhưng thuật toán của nó không phải đơn giản, đối với những người mới tìm hiểu bảng quang báo thì không phải chuyện một sớm một chiều là có thể làm được. Cho nên cứ làm đi, làm nhiều sẽ vỡ ra, chứ cứ ngại không thành công thì bao giờ mới làm được, các bạn sinh viên vào đây học là chủ yếu, làm cách này không được thì làm cách khác yên tâm đi không thiệt đâu, ít ra thì cũng rút ra được một số bài học. Chẳng có gì là muộn cả, nếu là bạn làm được như bọn Trung Quốc thì không có gì phải bàn cả.
+
+1.Chử chạy chưa hết thì đã tắt ngúm
+đây là Bảng chử của mình giống như trong video
+
+DB 0FFH,0FFH,0FFH,0FFH,0FFH,0FFH,0FFH,0FFH
+DB 0FFH,0FFH,0FFH,0FFH,0FFH,0FFH,0FFH,0FFH
+DB 0EFH,0EFH,0D7H,01H,0D7H,0EFH,0EFH,0FFH,0FFH ;*
+DB 0EFH,0EFH,0D7H,01H,0D7H,0EFH,0EFH,0FFH,0FFH ;*
+DB 0FFH,0FFH,80H,0FEH,0FEH,0FEH,0FEH,0FFH ;L
+DB 0FFH,0FFH,80H,0B6H,0B6H,0B6H,0B6H,0FFH ;E
+DB 0EFH,0EFH,0D7H,01H,0D7H,0EFH,0EFH,0FFH,0FFH ;*
+DB 0EFH,0EFH,0D7H,01H,0D7H,0EFH,0EFH,0FFH,0FFH ;*
+DB 0FFH,0FFH,9CH,0EBH,0F7H,0EBH,9CH,0FFH ;X
+DB 0FFH,0FFH,81H,0FEH,0FEH,0FEH,81H,0FFH ;U
+DB 0FFH,0FFH,0C0H,0B7H,0B7H,0B7H,0C0H,0FFH ;A
+DB 0FFH,0FFH,80H,8FH,0F7H,0F8H,80H,0FFH ;N
+DB 0EFH,0EFH,0D7H,01H,0D7H,0EFH,0EFH,0FFH,0FFH ;*
+DB 0EFH,0EFH,0D7H,01H,0D7H,0EFH,0EFH,0FFH,0FFH ;*
+DB 0FFH,0FFH,0BFH,0BFH,80H,0BFH,0BFH,0FFH ;T
+DB 0FFH,0FFH,0BEH,0BEH,80H,0BEH,0BEH,0FFH ;I
+DB 0FFH,0FFH,80H,8FH,0F7H,0F8H,80H,0FFH ;N
+DB 0FFH,0FFH,80H,0F7H,0F7H,0F7H,80H,0FFH ;H
+DB 0EFH,0EFH,0D7H,01H,0D7H,0EFH,0EFH,0FFH,0FFH ;*
+DB 0EFH,0EFH,0D7H,01H,0D7H,0EFH,0EFH,0FFH,0FFH ;*
+
+
+Nhưng trên thức tế thì nó chỉ Đến Mã chử H rồi tắt ngum mà không chạy tiếp 2 Ký tự * * rồi nó lại tiếp tục như luc đầu
+Không biêt cái này là lý do tại lam sao đây
+2.
+mình có 2 con led để kiểm tra cơ chế hút dòng của uln 2803
+2 led này đươc mắc nối tiếp vối cột 7 8 (tính từ trái qua) với chân 10 11 của uln 2803
+(2 cột mà khi chử đi qua thì có hiien tương mờ đi)
+Không biêt lúc quét cột thì dòng qua cac chân của ULN 2803 như thế nào
+(từ chân 10>> 18 nối lên cột từ 1>>8 nối với 595)
+
+Đúng rồi: do vượt quá tầm địa chỉ: > 16x8 nên do đó quyét ko được nữa là đúng. Nếu muốn quyét hết thì nên tầm địa chỉ lên thành 2 byte mới được ok?!
+
+Tất nhiên là quét hàng thì có khả năng ứng dụng cao hơn, ứng dụng với những bảng quang báo lơn, nhưng thuật toán của nó không phải đơn giản, đối với những người mới tìm hiểu bảng quang báo thì không phải chuyện một sớm một chiều là có thể làm được. Cho nên cứ làm đi, làm nhiều sẽ vỡ ra, chứ cứ ngại không thành công thì bao giờ mới làm được, các bạn sinh viên vào đây học là chủ yếu, làm cách này không được thì làm cách khác yên tâm đi không thiệt đâu, ít ra thì cũng rút ra được một số bài học. Chẳng có gì là muộn cả, nếu là bạn làm được như bọn Trung Quốc thì không có gì phải bàn cả.[/QUOTE]
+
+quét hàng hay quét cột cũng chỉ là quét và truyền dữ liệu thôi. nếu đã điều khiển được 595 thì cả hai cách làm điều như nhau. nhưng quét hàng thì tần số quét thấp nên phần công suất sẽ nhẹ hơn và đỡ tốn kém hơn nhất là sinh viên rồi. hi hi
+
+Đúng rồi: do vượt quá tầm địa chỉ: > 16x8 nên do đó quyét ko được nữa là đúng. Nếu muốn quyét hết thì nên tầm địa chỉ lên thành 2 byte mới được ok?!
+không hiểu ở đây anh nói là tầm địa chi của cái gì?
+Có phải là địa chỉ mình khai báo trong ASM không
+
+
+Từ vi điều khiển không thể gắn trực tiếp vào B của C1815, trong một vài trường hợp thì điều này có thể được. Tuy nhiên, thông thường người ta phải có điện trở mắc nối tiếp từ vi điều khiến đến C1815 gọi là trở hạn dòng. Mặc khác cần lưu ý: Mắc thế nào để áp Vbe=0.6v là được. Ví dụ từ vi điều khiển muốn mắc B của c1815 mà cực E của nó mắc theo kiểu e chung, khi đó 1 điện trở vài kilo ohm sẽ được cần đến, nếu không 1 điện áp 5/3v sẽ làm nỗ c1815 của bạn. Tính toán đơn giản là Vbe=0.6v--> áp rơi trên R là 5-0.6=4,4v. Dòng kích cho Transistor tùy loại ví dụ là 1mA, vậy thì R=4,4/(0,001) = 4k4, chọn 4k7 cho trường hợp này.
+Trước tiên em cảm ơn anh MicroDuyPhi:anh cho em hỏi thêm là
+1.C1815 dòng max qua nó 150mA nhưng muốn dòng lớn hơn thì sao.có thể thay bằng c828 kô.
+2.Anh nói(Ví dụ từ vi điều khiển muốn mắc B của c1815 mà cực E của nó mắc theo kiểu e chung).Chỉ có 1 con C1815 thì làm sao mắc như anh nói đc,anh có thể nói thêm kô?
+
+Từ vi điều khiển không thể gắn trực tiếp vào B của C1815, trong một vài trường hợp thì điều này có thể được. Tuy nhiên, thông thường người ta phải có điện trở mắc nối tiếp từ vi điều khiến đến C1815 gọi là trở hạn dòng. Mặc khác cần lưu ý: Mắc thế nào để áp Vbe=0.6v là được. Ví dụ từ vi điều khiển muốn mắc B của c1815 mà cực E của nó mắc theo kiểu e chung, khi đó 1 điện trở vài kilo ohm sẽ được cần đến, nếu không 1 điện áp 5/3v sẽ làm nỗ c1815 của bạn. Tính toán đơn giản là Vbe=0.6v--> áp rơi trên R là 5-0.6=4,4v. Dòng kích cho Transistor tùy loại ví dụ là 1mA, vậy thì R=4,4/(0,001) = 4k4, chọn 4k7 cho trường hợp này.
+Trước tiên em cảm ơn anh MicroDuyPhi:anh cho em hỏi thêm là
+1.C1815 dòng max qua nó 150mA nhưng muốn dòng lớn hơn thì sao.có thể thay bằng c828 kô.
+2.Anh nói(Ví dụ từ vi điều khiển muốn mắc B của c1815 mà cực E của nó mắc theo kiểu e chung).Chỉ có 1 con C1815 thì làm sao mắc như anh nói đc,anh có thể nói thêm kô?
+
+Thế lại là chuyện khác chứ pác Hung ơi, ở trong link đó chỉ là mạch đèn sáng theo tiếng nhạc thôi đấy chứ, mà như vậy làm vdk thật thừa[/QUOTE
+cái đó không chỉ nhấy théo nhạc
+mà thay đổi màu sắc RGB mà. và độ sàng thì tăng giảm liên tục
+nếu bạn vẫn thấy đơn giản thì có thể giúp thiết kế một mạch như thế này nhưng điều khiên qua một máy tính chăng hạn
+mong bạn giúp đỡ
+minh là ngừoi mới mà
+
+ps: các bác pro cho em biêt làm sao để điều chỉnh độ sáng của mấy cái đền đó vậy
+mà VDK đau có tăng giảm dòng điện được ạ
+Việc thay đổi PWM qua mạch lọc sẽ cho 1 điên áp trung bình theo duty cycle của PWM, mặc dù điều chế PWM ta chỉ có 0 và 1 nhưng dựa vào độ rộng xung đó sẽ làm cho áp ở đầu ra thay đổi. (Cái này có công thức tính Volt out theo Độ rộng của xung).
+
+như vậy thay đổi pwm sẽ làm cho led thay đổi độ sáng.
+
+Đơn giản là: Dùng 3 con led mua về gắn gần nhau, rồi dùng 3 bộ PWM cho thay đổi tuần tự từ 0-->255, ta sẽ thdduwwocjw chuỗi dãi sáng thay đổi thật đẹp mắt.
+

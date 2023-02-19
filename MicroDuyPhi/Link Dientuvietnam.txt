@@ -1,0 +1,3 @@
+http://www.dientuvietnam.net/forums/member/24-microduyphi/about
+
+http://www.dientuvietnam.net/forums/search?searchJSON=%7B%22authorid%22%3A%5B%2212122%22%5D%2C%22channel%22%3A%222%22%2C%22exclude_type%22%3A%5B%22vBForum_PrivateMessage%22%2C+%22vBForum_Channel%22%5D%7D

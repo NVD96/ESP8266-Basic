@@ -1,0 +1,1 @@
+Dùng bộ thu phát hồng ngoại, khoảng cách bình thường ko chướng ngại vật là: 10met, đã test trên 9148 và 9149.

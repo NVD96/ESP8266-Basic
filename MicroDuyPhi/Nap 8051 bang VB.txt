@@ -1,0 +1,77 @@
+Diode1447 hồi trước cũng là 1 trong những cao thủ làm phần cứng, khá về 8051 và PIC.Chắc giờ đã ra trường??? đi làm rồi thì phải.
+Biết nhau từ năm 2002 mà đến giờ vẫn ko biết cao danh quý tính là gì cả?!
+
+
+uy Phi nói xạo. Em mới bước vào đại học năm 2002 thì làm sao anh biết được! Còn là cao thủ thì ... ặc ặc...Trong môn phái thì mình có thể là sư huynh, chứ còn bước ra giang hồ thì là đồ tiểu tốt. Mới tốt nghiệp xong làm thằng kỹ sư nghèo... Khi nào có dịp về Nha Trang ăn bún cá, đàm chuyện tây nha anh.
+
+In Circuit Programming: Đây là phương án thiết kế mà mình hướng đến. Vì tính thông dụng của các Chip tương thích hiện nay. Mình cung cấp một số hàm sau để truy cập các lệnh và bộ nhớ Flash. Vì ko có khiếu viết lách nên đành Post mã Rude vậy. Mong thông cảm.
+Ngôn ngữ C được viết để tiện lợi cho việc thay đổi chiến thuật thiết kế: Nếu sử dụng truyền nối tiếp để thực hiện truyền dữ liệu thì Kho thư viện này sẽ được đưa vào Vi điều khiển Master. Nếu dùng truyền qua LPT thì kho này được sử dụng làm các Tệp cho VC++ (sau đó biên dịch thành .dll) để viết truy cập LPT trong các ngôn ngữ hướng đối tượng.
+
+/*********Hai hàm SPI cơ bản***********
+void SPISendByte(unsigned char byte) {
+unsigned char i;
+DDRB.5 = 1;
+DDRB.7 = 1;
+SCK = 0;
+delay_us(10);
+for (i=0;i<=7;i++) {
+if (byte & 0x80) MOSI = 1;
+else MOSI = 0;
+byte = byte << 1;
+SCK = 1;
+delay_us(10);
+SCK = 0;
+delay_us(10);
+}
+MOSI = 0;
+delay_us(10);
+}
+//******************************
+unsigned char SPIGetByte() {
+unsigned char i,dulieu,bitdulieu;
+dulieu = 0;
+MISO = 1;
+DDRB.6 = 0;
+DDRB.7 = 1;
+SCK = 0;
+delay_us(10);
+for (i=0;i<=7;i++) {
+SCK = 1;
+delay_us(10);
+if (PINB & 0x40) bitdulieu = 0x01;
+else bitdulieu = 0x00;
+dulieu = dulieu << 1;
+dulieu = dulieu | bitdulieu;
+SCK = 0;
+delay_us(10);
+}
+MISO = 0;
+delay_us(10);
+return dulieu;
+}
+//******************************
+Ai bảo chăn trâu là khổ ...!?
+
+Cho mình hỏi vài câu hỏi nhỏ như sau:
+- Nếu chân P3.4 và P3.5 lần lượt ở mức 0 hoặc mức 1 thì áp VDD và VPP lần lượt là bao nhiêu ?
+- Các con BC547 có thể thay thế bằng C828 hoặc C1815 được không? Chức năng của BC547 trong mạch này là gì?
+- Con Zener 5.6V có bán ngoài thị trường không?
+
+Rất mong nhận được sự giúp đỡ của các bạn. Mình xin chân thành cảm ơ
+
+Không thấy ai đóng góp ý cho bạn nên tôi mạo muội post tiếp.
+Nếu:
+P3.4 = 0, P3.5 = 0 áp ra 12v
+P3.4 = 1, P3.5 = 0 áp ra zero
+P3.4 = 0, P3.5 = 1 áp ra 5v
+Bạn có thể thay thế bằng tranistor C1815. Tấc cả linh kiện đều dễ tìm, ở sài gòn ra nhật tảo là ok.
+
+
+Mỗi VDK khi nạp có 1 mức điện áp để nạp khác nhau: Như 89cxx thì 12v, 89sxx thì năm volt,còn một số khác là tầm sáu volt năm.
+Do đó phải cần đến mạch này để thay đổi các mức áp.
+Nếu muốn hiểu rõ xin theo dõi sự cập nhật của trang web phía dưới mỗi ngày 1 lần.
+Chúc vui
+
+Áp VDD là áp chung cấp cho toàn mạch bạn nên chọn > 13,5 VDC
+
+

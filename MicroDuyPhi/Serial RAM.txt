@@ -1,0 +1,11 @@
+Chào các bạn! Có bạn nào biết loại Serial RAM khoảng vài KB giống như Serial Rom 24C16, 24C64... Nhưng loại Serial Rom thì thời gian delay khá lớn. Do đó, mình cần tìm loại Serial RAM có thời gian ghi và đọc nhanh hơn. Có bạn nào biết không giúp mình với. Thanks.
+
+Truoc het xin loi cho toi viet ko dau!
+Ve van de nay, trong dien dan da ban va noi den kha nhieu, ban co gang tim lai cac bai viet cach day vai thang se ro.
+- Ram serial hien nay co nhieu hang san xuat: Atmel, Thomson, Faich.., National Semi... Va di nhien toc do cua chung cung co khac. Thuong thi nguoi ta se danh gia f/t vi du ram 24C00 cua hang Microchip co toc do ghi nhan la 400khz/4ms.
+Ban hay tham khao tai lieu cua chinh hang.
+Mot van de khac nua la chung ta nen su dung cac chip co ho tro gthuc I2C de tiet kiem tai nguyen xu ly cua chip
+
+Xin đính chính 1 chút. 24C64 là EEPROM chứ không phải RAM.
+Còn serial RAM thì bạn có thể xem DS1200 tại http://www.maxim-ic.com/quick_view2.cfm/qv_pk/2627 . Nhưng tôi nghĩ con này không bán ở VN mà phải đặt mua thôi.
+

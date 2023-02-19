@@ -1,0 +1,158 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+INCLUDE 89c51.mc
+org 0000h
+
+main:
+			MOV p0,#0fh
+			MOV R0,#20h
+			MOV @R0,#16
+			MOV R4,#1
+	thucthi:    ACALL xuatled
+			sjmp thucthi
+
+
+nhanphiem: 
+	loop0:		JNB p0.0,phiem1
+	loop1:		JNB p0.1,phiem2
+	loop2:		JNB p0.2,phiem3
+	loop3:		JNB p0.3,phiem4
+                 RET
+;....................................................................................................
+	
+	phiem1:		MOV p0,#0fh
+			SETB p0.4
+			MOV R1,#50
+			DJNZ R1,$
+			JB p0.0,loop1
+			JNB p0.0,$
+			MOV R0,#20h
+			INC @R0
+			INC @R0
+			LJMP loop1
+			
+	phiem2:
+			MOV p0,#0fh
+			SETB p0.5
+			MOV R1,#50
+			DJNZ R1,$
+			JB p0.1,loop2
+			JNB p0.1,$
+			MOV R0,#20h
+			DEC @R0
+		    	DEC @R0 
+		    	CJNE @R0,#00h,loop2
+		     	MOV @R0,#16
+			LJMP loop2
+	phiem3:
+			MOV p0,#0fh
+			SETB p0.6
+			MOV R1,#50
+			DJNZ R1,$
+			JB p0.2,loop3
+			JNB p0.2,$
+			INC R4
+			CJNE R4,#7,loop3
+			MOV R4,#1
+			LJMP loop3
+			
+	phiem4:	MOV p0,#0fh
+			MOV @R0,#12
+			SETB p0.7
+			LJMP loop0
+;.....................................................................	
+delay:		MOV A,@R0
+		     	MOV R6,A
+	 LOOP:	MOV TMOD,#01H
+			MOV TL0,#58H
+			MOV TH0,#c5H
+			SETB TR0
+			JNB TF0,$
+			CLR Tf0
+			CLR TR0
+			acall nhanphiem
+			DJNZ R6,LOOP
+			RET 
+;.....................................................................
+xuatled:		
+			MOV R3,#08
+			MOV R2,#00h
+	lap:		ACALL chon_td
+			MOV A,R2
+			MOVC A,@a+dptr
+			MOV p1,A
+			ACALL delay
+			INC R2
+			DJNZ R3,lap
+			RET
+;...................................................................
+chon_td:		MOV A,R4
+			
+			CJNE A,#1,so2
+			MOV DPTR,#lable1
+			SJMP exit
+	so2:		
+			CJNE A,#2,so3
+			MOV DPTR,#lable2
+			SJMP exit
+	so3:		
+			CJNE A,#3,so4
+			MOV DPTR,#lable3
+			SJMP exit
+	so4:		
+			CJNE A,#4,SO5
+			MOV DPTR,#lable4
+			SJMP exit
+	so5:		
+			CJNE A,#5,SO6
+			MOV DPTR,#lable5
+			SJMP exit
+	so6:		
+			CJNE A,#6,exit
+			MOV DPTR,#lable6
+			
+	exit:		RET
+;...................................................................
+lable1:
+	DB    01h,03h,07h,0fh,1fh,3fh,7fh,ffh
+lable2:
+	DB	00h,00011000b,00100100b,01000010b,10000001b,11000011b,11100111b,11111111b
+lable3:
+	DB	01h,00000010b,00000100b,00001000b,00010000b,00100000b,01000000b,10000000b
+lable4:
+	DB	03h,00000110b,00001100b,00011000b,00110000b,01100000b,11000000b,10000000b
+lable5:
+	DB    ffh,7fh,3fh,1fh,0fh,07h,03h,01h
+lable6:
+	DB    01h,00000101b,00010101b,01010101b,10000000b,10100000b,10101000b,10101010b			
+		END
+			
+
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+		

@@ -1,0 +1,12 @@
+Hiện mình đang viết một số chương trình trên con 89c51 nhưng gặp trở ngại về việc mở rộng bộ nhớ ROM cho nó. Có bác nào biết biết về IC ROM để giao tiếp với con 89c51 không thì giúp mình với.
+
+Và cho mình hỏi thêm luôn là làm thế nào để mở rộng thêm bộ nhớ RAM cho nó? Sử dụng IC nhớ RAM nào?
+
+Sử dụng chip 89C51RD2 thì thoải con gà mái mà sai bộ nhớ cả ROM lẫn RAM; 64K Bytes ISP FLASH, 256 Bytes on-chip RAM, 768 Bytes XRAM; Bán rất nhiều ở 17A Hà Thuyên, khỏi phải mắc thêm ROM và RAM cho mất thì giờ.
+
+Bộ nhới tren 8051 thuong không đủ de xu ly mot so cac van de! Va trong do con 89C51Rd2 cung vay! Do do nguoi ta se dung cac loai RAM ngoai de dap ung trong chuyen nay.
+Ram co nhieu loai se duoc dung den nhu:
+- RAM mat noi dung thi co ho: 62xx
+- RaM khong mat noi dung thi co nhieu loai khac nhau: 28xx, 24xx va cac ho DS12xx
+
+

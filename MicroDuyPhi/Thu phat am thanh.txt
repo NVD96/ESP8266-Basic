@@ -1,0 +1,12 @@
+Mình muốn làm 1 cái mạch thu phát âm thanh (âm tần thôi) .Nghĩa là có 1 cái mạch phát và 1 cái mạch thu.Khi ta nhấn 1 cái nút ở bên mạch phát thì bên mạch thu nhận được và sáng 1 cái đèn chẳng hạn.
+Mình có đọc 1 bài về thu phát âm thanh ở trên diễn dàn (nói về IC thu phát âm thanh và dùng Eprom +89C51+ADC gì đó) trong đó nói gì về chuẩn MP3 ,rồi SD/MMC gì đó lung tung hết trơn.
+Mình chẳng biết gì hết,mình không phải dân Viễn Thông,mình là dân Tự Động
+Mình muốn tìm hiễu về nguyên lý thu phá âm thanh và giải mã âm thanh nhưg k bít kiếm tài liệu ở đâu hết
+Bạn nào biết thì giúp mình với .Tiếng Việt hoặc tiếng Anh gì cũng được.
+
+-âm Thanh đc Chuyển Hóa Dưới Dạng Số Thông Qua Một Phần Mềm Chuyển đổi- Thương Là File *.wav
+-sau đó Nạp Nội Dung Này Vào Rom,eefrom Hoặc Tương đương Là Nvram.
+- Dùng 89 đọc Nội Dung Thông Tin Này Do Dưới Dạng Số Do đó Sau đó Phải Chuyển đổi Thành Analog Bằng 1 Dac Thường Là 8 Bit.
+- Cuối Cùng Là Dùng Một Mạch Khuyech đại âm Tầm để Phát Lại âm Thanh Này.
+- âm Thanh Nghe Rõ Ràng Tùy Thuộc Vào Tốc độ Chuyển đổi: Chuẩn Là 8kb/s, Tốn Ram- Không Yêu Cầu Gì Cao Thì Chọn 4kb/s.
+

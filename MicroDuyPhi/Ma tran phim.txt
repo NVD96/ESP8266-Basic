@@ -1,0 +1,83 @@
+Chương trình asem.
+Chương trình này mình đã chạy trên mạch thật, và chạy rất tốt với ma trận phím 4x4, không bị nhiễu, chống nảy xung tốt.
+
+
+quet: mov P1,#0ffh
+k1: clr P1.4
+clr P1.5
+clr P1.6
+clr P1.7
+mov A,P1
+anl A,#00001111b
+cjne A,#00001111b, k1
+
+k2: acall delay
+mov A,P1
+anl A,#00001111b
+cjne A,#00001111b, over
+sjmp k2
+
+over: acall delay
+mov A, P1
+anl A, #00001111b
+cjne A, #00001111b, over1
+sjmp k2
+
+over1: clr P1.4
+setb P1.5
+setb P1.6
+setb P1.7
+mov A, P1
+cjne A, #11101111b, hang0
+clr P1.5
+setb P1.4
+setb P1.6
+setb P1.7
+mov A, P1
+cjne A, #11011111b, hang1
+clr P1.6
+setb P1.5
+setb P1.4
+setb P1.7
+mov A, P1
+cjne A, #10111111b, hang2
+clr P1.7
+setb P1.5
+setb P1.6
+setb P1.4
+mov A,P1
+cjne A,#01111111b,hang3
+ljmp k2 ;lap lai neu vao sai
+
+hang0: mov DPTR,#ma0
+sjmp find
+
+hang1: mov DPTR,#ma1
+sjmp find
+
+hang2: mov DPTR,#ma2
+sjmp find
+
+hang3: mov DPTR,#ma3
+sjmp find
+
+find: rrc A
+jnc match
+inc DPTR
+sjmp find
+
+match: clr A
+movc A,@A+DPTR
+
+------------------------------------------
+
+Đến đây thì có thể tùy ý xử lý với mã ASCII của phím nhấn lưu trong thanh ghi A.
+
+Chương trình con delay:
+
+delay: mov r4,#10
+again: mov r3,#10
+lap:
+djnz r3,lap
+djnz r4,again
+ret

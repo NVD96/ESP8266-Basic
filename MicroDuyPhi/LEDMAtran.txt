@@ -1,0 +1,269 @@
+INCLUDE 89c51.mc
+org 0000h
+
+main:	
+			MOV R0,#0
+			MOV 10h,#0
+			MOV 20h,#0
+			MOV 30h,#0
+		
+	loop:		ACALL out_led
+			SJMP loop
+;....................................................................
+chon_phiemnhan:	
+			CLR C
+			ACALL getkey
+			JNC exit_chon
+			MOV R4,#50
+			DJNZ R4,$
+			ACALL getkey
+			JNC exit_chon
+			MOV R3,A
+		thu:	ACALL getkey
+			JC thu
+			MOV A,R3
+			ACALL nhanphiem
+	exit_chon:	RET
+;.....................................................................
+ GETKEY:
+		MOV A,#0F7H
+		MOV R6,#4
+	TEST: MOV P1,A
+	 	MOV R7,A
+	 	MOV A,P1
+	 	ANL A,#0F0H
+	 	CJNE A,#0F0H,KEY_HIT
+	 	MOV A,R7
+	 	RR A
+	 	DJNZ R6,TEST
+	 	CLR C
+	 	LJMP EXIT
+   KEY_HIT: MOV R7,A
+	 	MOV A,#4
+	 	CLR C
+	 	SUBB A,R6
+	 	MOV R6,A
+	 	MOV A,R7
+	 	SWAP A
+	 	MOV R2,#4
+     AGAIN: RRC A
+	 	JNC DONE
+	 	INC R6
+	 	INC R6
+	 	INC R6
+	 	INC R6
+	 	DJNZ R2,AGAIN
+      DONE: SETB C
+	 	MOV A,R6
+      EXIT: NOP
+	      RET
+;.................................................................
+
+nhanphiem:
+			so0:	CJNE A,#0,so1
+				ACALL gan_chu
+				SJMP exit_nhanphiem
+			so1:	CJNE A,#1,so5
+				ACALL ganmau_do
+				SJMP exit_nhanphiem
+	
+			so5:	CJNE A,#5,so9
+				ACALL ganmau_vang
+				SJMP exit_nhanphiem
+			
+			so9:	CJNE A,#9,exit_nhanphiem
+				ACALL ganmau_cam			
+
+	exit_nhanphiem:	RET
+
+;....................................................................
+gan_chu:			MOV R1,10h
+				INC R1
+				CJNE R1,#26,exit_gan
+				MOV R1,#0
+		exit_gan:	MOV 10h,R1
+				RET
+;....................................................................
+ganmau_do:			MOV 20h,#0
+				RET
+ganmau_vang:		MOV 20h,#1
+				RET
+ganmau_cam:			MOV 20h,#2
+				RET
+;....................................................................
+set_chu:	
+		chu0:		
+				MOV A,10h
+				CJNE A,#0,chu1
+				MOV DPTR,#batdau
+				LJMP exit_set_chu
+		chu1:		
+				CJNE A,#1,chu2
+				MOV DPTR,#chu_a
+				LJMP exit_set_chu
+		chu2:	
+				CJNE A,#2,chu3
+				MOV DPTR,#chu_b
+				LJMP exit_set_chu
+		chu3:		
+				CJNE A,#3,chu4
+				MOV DPTR,#chu_c
+				LJMP exit_set_chu
+		chu4:		
+				CJNE A,#4,chu5
+				MOV DPTR,#chu_d
+				LJMP exit_set_chu
+		chu5:	
+				CJNE A,#5,chu6
+				MOV DPTR,#chu_e
+				LJMP exit_set_chu
+		chu6:	
+				CJNE A,#6,chu7
+				MOV DPTR,#chu_f
+				LJMP exit_set_chu
+		chu7:		
+				CJNE A,#7,chu8
+				MOV DPTR,#chu_g
+				LJMP exit_set_chu
+		chu8:	
+				CJNE A,#8,chu9
+				MOV DPTR,#chu_h
+				LJMP exit_set_chu
+		chu9:		
+				CJNE A,#9,chu10
+				MOV DPTR,#chu_i
+				LJMP exit_set_chu
+		chu10:
+				CJNE A,#10,chu11
+				MOV DPTR,#chu_j
+				LJMP exit_set_chu
+		chu11:			
+				CJNE A,#11,chu12
+				MOV DPTR,#chu_k
+				LJMP exit_set_chu
+		chu12:				
+				CJNE A,#12,chu13
+				MOV DPTR,#chu_l
+				LJMP exit_set_chu
+		chu13:			
+				CJNE A,#13,chu14
+				MOV DPTR,#chu_m
+				LJMP exit_set_chu
+		chu14:			
+				CJNE A,#14,chu15
+				MOV DPTR,#chu_n
+				LJMP exit_set_chu
+		chu15:			
+				CJNE A,#15,chu16
+				MOV DPTR,#chu_o
+				LJMP exit_set_chu
+		chu16:				
+				CJNE A,#16,chu17
+				MOV DPTR,#chu_p
+				LJMP exit_set_chu
+		chu17:			
+				CJNE A,#17,chu18
+				MOV DPTR,#chu_q
+				LJMP exit_set_chu
+		chu18:			
+				CJNE A,#18,chu19
+				MOV DPTR,#chu_r
+				LJMP exit_set_chu
+		chu19:			
+				CJNE A,#19,chu20
+				MOV DPTR,#chu_s
+				LJMP exit_set_chu
+		chu20:				
+				CJNE A,#20,chu21
+				MOV DPTR,#chu_t
+				LJMP exit_set_chu
+		chu21:			
+				CJNE A,#21,chu22
+				MOV DPTR,#chu_u
+				LJMP exit_set_chu
+		chu22:				
+				CJNE A,#22,chu23
+				MOV DPTR,#chu_v
+				LJMP exit_set_chu
+		chu23:			
+				CJNE A,#23,chu24
+				MOV DPTR,#chu_x
+				LJMP exit_set_chu
+		chu24:
+				CJNE A,#24,chu25
+				MOV DPTR,#chu_y
+				LJMP exit_set_chu
+		chu25:	
+				CJNE A,#25,exit_set_chu
+				MOV DPTR,#chu_z
+exit_set_chu:		ret
+
+;..................................................................
+set_mau:			MOV A,20h
+				CJNE A,#0,mau1
+				MOV p0,30h
+				MOV p2,0
+				SJMP exit_set_mau
+		mau1:		
+				CJNE A,#1,mau2
+				MOV p2,30h
+				MOV p0,0
+				SJMP exit_set_mau
+		mau2:	
+				CJNE A,#2,exit_set_mau
+				MOV p0,30h
+				MOV p2,30h
+	exit_set_mau:	RET
+	
+;....................................................................	
+OUT_LED:			ACALL chon_phiemnhan
+				ACALL set_chu
+	kkk:			MOV	A,R0
+				MOVC	A,@A+DPTR
+				MOV   30h,A
+				ACALL set_mau
+				INC	R0
+				MOV	A,R0
+				MOVC	A,@A+DPTR
+				MOV	P3,A
+				INC	R0
+				CALL	DELAY
+				CJNE	R0,#10,OUT_LED
+				MOV	R0,#0
+				RET
+;.....................................................................	
+DELAY:		MOV	R7,#20
+	LOOP1:		MOV	R5,#30
+	LOOP2:		DJNZ	R5,LOOP2
+				DJNZ	R4,LOOP1
+				RET
+;...................................................................
+	batdau:			DB    fFH,01H,eeH,02H,ddH,04H,ccH,08H,bbH,10H
+	CHU_B:			DB	7FH,01H,49H,02H,49H,04H,49H,08H,36H,10H
+	CHU_A:			DB	7EH,01H,09H,02H,09H,04H,09H,08H,7EH,10H
+	CHU_C:			DB	3EH,01H,41H,02H,41H,04H,41H,08H,22H,10H
+	CHU_D:			DB	7FH,01H,41H,02H,41H,04H,41H,08H,3EH,10H
+	CHU_E:			DB	7FH,01H,49H,02H,49H,04H,49H,08H,49H,10H
+	CHU_F:			DB	7FH,01H,09H,02H,09H,04H,09H,08H,01H,10H
+	CHU_G:			DB	3EH,01H,41H,02H,41H,04H,49H,08H,7AH,10H
+	CHU_H:			DB	7FH,01H,08H,02H,08H,04H,08H,08H,7FH,10H
+	CHU_I:			DB	41H,01H,41H,02H,7FH,04H,41H,08H,41H,10H
+	CHU_J:			DB	20H,01H,40H,02H,40H,04H,40H,08H,3FH,10H
+	CHU_K:			DB	7FH,01H,08H,02H,14H,04H,22H,08H,41H,10H
+	CHU_L:			DB	7FH,01H,40H,02H,40H,04H,40H,08H,40H,10H
+	CHU_M:			DB	7FH,01H,02H,02H,04H,04H,02H,08H,7FH,10H
+	CHU_N:			DB	7FH,01H,01H,02H,01H,04H,02H,08H,7FH,10H
+	CHU_O:			DB	3EH,01H,41H,02H,41H,04H,41H,08H,3EH,10H
+	CHU_P:			DB	7FH,01H,09H,02H,09H,04H,09H,08H,06H,10H
+	CHU_Q:			DB	3EH,01H,41H,02H,41H,04H,61H,08H,7EH,10H
+	CHU_R:			DB	7FH,01H,09H,02H,19H,04H,29H,08H,46H,10H
+	CHU_S:			DB	26H,01H,49H,02H,49H,04H,49H,08H,32H,10H
+	CHU_T:			DB	01H,01H,01H,02H,7FH,04H,01H,08H,01H,10H
+	CHU_U:			DB	3FH,01H,40H,02H,40H,04H,40H,08H,3FH,10H
+	CHU_V:			DB	1FH,01H,20H,02H,40H,04H,20H,08H,1FH,10H
+	CHU_X:			DB	41H,01H,41H,02H,3EH,04H,41H,08H,41H,10H
+	CHU_Y:			DB	03H,01H,04H,02H,78H,04H,04H,08H,03H,10H
+	CHU_Z:			DB	61H,01H,51H,02H,49H,04H,45H,08H,43H,10H
+END
+
+

@@ -1,0 +1,7 @@
+Nếu họ dùng micro có dây thì bótay thôi!
+Còn nếu dùng Micro không dây thì chuyện phá phách họ là chuyện bình thường thôi!
+1- Thông thường dân chơi hay dùng micro loại xịn, tần số quanh quẩn 220Mhz
+2- loại bình dân dùng micro tần số 106Mhz, nhưng e là kô còn xuất hiện nữa rồi.
+Bước 1: Nhanh- gọn - Mua 1 cái micro tần số cỡ đó( 220mhz) về nâng công suất lên và đưa tín hiệu bậy bạ vào phát đi
+2- Cài thêm mạch dao động đa hài ở chỗ Điot Variac, con này có chức năng tạo sai lệnh tần số do đó sẽ gây ra 1 loạt các tần số và cho nó phát đi, lúc đó cho dù Lam Trường, Phương Thanh cũng thành cỡ DuyPhi này hét là cùng he he
+3- tính toán bộ dao động tần số quanh đó và cho phát đi!
