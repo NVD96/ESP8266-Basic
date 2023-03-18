@@ -1,0 +1,523 @@
+
+/************KHAI BAO THU VIEN, DINH NGHIA********************************************* ***********/
+#include <AT89X52.H>
+
+#define Set_key P3_0
+#define Up_key	P3_1
+#define Dw_key	P3_2
+#define Alarm P3_4
+#define Loa P1_0
+#define Ok P3_3
+#define PM P3_7
+#define SDA P2_1	
+#define SCL P2_0	
+#define DS1307_ID 0xD0	
+#define SEC 0x00
+#define	MIN 0x01	
+#define HOUR 0x02
+//#define ON_OFF  0x0C
+#define A_MIN 0x08
+#define A_HOUR 0x09
+	
+//#define DATE 0x04
+//#define MONTH 0x05
+//#define YEAR 0x06
+
+/************KHAI BAO BIEN, MANG...******************************************* ********************/
+unsigned char led7_data[10] = {0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0x80,0x90 }; //Decimal to Led7seg
+unsigned char t_view,time,index,F_set,B_nhay,get_t ;
+unsigned char hour,sec,min;
+unsigned char alarm,Display,Data,a_hour,a_min,on_off;
+
+/************KHAI BAO HAM, CHUONG TRINH CON*********************************************** ********/
+void set_main(void);	 // Chuong trinh khoi tao main
+void setup_timer(void);	 // Chuong trinh cai dat timer 1 va 0 
+void delay(unsigned int time); // Delay
+void Fix_time(void);	 // Kiem tra va hieu chinh gia tri cua gio,phut,giay
+void Keypad(void);	 // Kiem tra xu ly phim nhan.	
+void T1_ISR(void);	 //ngat timer 1 phuc vu nhay led
+void T0_ISR(void); // Dung ngat timer 0 de quet led
+
+/************CAC CHUONG TRINH CON*********************************************** ******************/
+
+// LOA
+void bip(void)
+{
+	unsigned char n;
+    for(n=0;n<100;n++)
+    {
+		Loa=1; delay(50);
+        Loa=0; delay(50);
+    }    
+}
+
+
+// FOR I2C
+/************************************************** *********************/
+
+void I2C_start(void)
+{
+SCL	= 1;	SCL = 0;
+SDA = 1;	SCL = 1;
+delay(2);
+SDA = 0; delay(2);
+SCL = 0; delay(2);
+}
+void I2C_stop(void)
+{
+SCL = 1;	SCL = 0;
+SDA = 0;	delay(2);
+SCL = 1;	delay(2);
+SDA = 1;	
+}
+bit I2C_write(unsigned char dat)
+{
+unsigned char i;	
+for (i=0;i<8;i++)
+{
+SDA = (dat & 0x80) ? 1:0;
+SCL=1;SCL=0;
+dat<<=1;
+}
+SCL = 1;	delay(2);
+SCL = 0;
+//return dat;
+}
+unsigned char I2C_read(void)
+{
+bit rd_bit;	
+unsigned char i, dat;
+dat = 0x00;	
+for(i=0;i<8;i++)	 /* For loop read data 1 byte */
+{
+delay(2);
+SCL = 1;	 /* Set SCL */
+delay(2); 
+rd_bit = SDA;	 /* Keep for check acknowledge	*/
+dat = dat<<1;	
+dat = dat | rd_bit;	/* Keep bit data in dat */
+SCL = 0;	 /* Clear SCL */
+}
+return dat;
+}
+/************************************************** *********************/
+// FOR DS1307
+/************************************************** *********************/
+
+unsigned char DS1307_get(unsigned char addr) 
+{
+unsigned int temp,ret;	
+I2C_start(); /* Start i2c bus */
+I2C_write(DS1307_ID); /* Connect to DS1307 */
+I2C_write(addr);	 /* Request RAM address on DS1307 */	
+I2C_start();	 /* Start i2c bus */
+I2C_write(DS1307_ID+1);	/* Connect to DS1307 for Read */
+ret = I2C_read();	 /* Receive data */
+I2C_stop();
+//*********************************************
+temp = ret;	 /*BCD to HEX*/
+ret = (((ret/16)*10)+ (temp & 0x0f));	 /*for Led 7seg*/
+//*********************************************	
+return ret;	
+}
+
+/**********************************/
+void DS1307_Write(unsigned char addr,unsigned char dat)
+{
+unsigned int temp;
+//**********************************************	 /*HEX to BCD*/
+temp = dat ;	 /*for Led 7seg*/
+dat = (((dat/10)*16)|(temp %10));
+//**********************************************	
+I2C_start(); /* Start i2c bus */
+I2C_write(DS1307_ID); /* Connect to DS1307 */
+I2C_write(addr);	 /* Request RAM address on DS1307 */	
+I2C_write(dat);	/* Connect to DS1307 for Read */
+I2C_stop();
+}
+/*********************CHUONG TRINH TAO NHAP NHAY LED***************************** *********************/
+ void Out_1Hz()
+{
+	I2C_start(); /* Start i2c bus */
+	I2C_write(0xD0); /* Connect to DS1307 */
+	I2C_write(0x07);   //vi tri con tro RTC
+	I2C_write(0x10);
+	I2C_stop();
+}
+/*********CHUONG TRINH GHI HEN GIO**************/
+void Write_Alarm()
+{
+	DS1307_Write(A_MIN,a_min);
+	DS1307_Write(A_HOUR,a_hour);
+	//DS1307_Write(ON_OFF,on_off);
+}
+void Read_Alarm()
+{
+    a_min   = DS1307_get(A_MIN);
+	a_hour  = DS1307_get(A_HOUR);
+	//on_off  = DS1307_get(ON_OFF);
+}
+/**********GHI GIA TRI SETUP VAO DS1307************/
+void Write_DS1307()
+{
+DS1307_Write(0x02,hour);
+DS1307_Write(0x01,min);
+DS1307_Write(0x00,sec);
+}
+/*********DOC GIA TRI TRONG DS1307********/
+void Read_DS1307()
+{
+sec = DS1307_get(SEC);
+min = DS1307_get(MIN);	
+hour = DS1307_get(HOUR);
+}
+/***********CHUONG TR?N TAO THOI GIAN TRE*************/
+void delay(unsigned int time)
+{	while(time--); }
+/*************************************/
+void set_main(void)	 // Chuong trinh khoi tao main
+{
+P1=0xFF;//11111111b	Cac chan muc cao 
+P0=0x00;//00000000b cac chan muc thap tin hieu ra
+P2=0x00;//00000000b	cac chan mua thap
+P3=0xFF;//11111111b cac chan muc cao cho tin hieu vao
+}
+/*********************CAI DAT GIA TRI TIMER BAN DAU***********************/
+void setup_timer(void)	// Setup timer 0 va timer 1 
+{
+TMOD=0x11; // timer0 & timer1 set che do 1
+TH0=-1000/256; TL0=-1000%256;
+TH1=0x3C; TL1=0xAF;
+ET1=1; ET0=1;	EA=1;
+TF0=0; TF1=0;	TR0=1;	TR1=1;
+}
+/************************************/
+void Fix_time(void)	 // Kiem tra va hieu chinh gia tri cua gio,phut,giay
+{
+//Tang
+if(sec==60)	{sec=0;min++;	}
+if(min==60)	{min=0;hour++;	}
+if(hour==24) hour=0;
+//Giam
+if(sec== -1) {sec=59;min--;}
+if(min== -1) {min=59;hour-- ;}
+if(hour== -1)hour= 23;
+}
+/**************************************/
+
+//*********************************CHUONG TRÌNH NÚT BAM CAI DAT HE THONG*****************************
+ void Keypad(void) // Kiem tra phim nhan.
+ {
+ //********************Neu nhan nut Ok*******************************************
+    if(!Ok)
+	{
+		delay(1000);
+		while(!Ok){;} delay(1000);// chong rung phim
+		bip();
+			Display=F_set=alarm=0;// Goi hien thi chuong trinh Dong Ho Chay 
+		if(on_off==1)// Neu bat che do Hen gio = 1
+		{
+		Write_Alarm();// ghi che do hen gio	
+		}
+		else 
+		{
+		Write_DS1307();	// ghi che do Gio - Phut - Giay
+		}
+	} 
+//***********************Neu nhan nut Setup*******************************************
+
+if(Display==0)
+	{
+		if(!Set_key)
+		{ 
+			bip();
+			while(!Set_key);			
+			F_set++; 
+			if(F_set==4) 
+			{		
+				F_set=0;
+				Write_DS1307();
+			}
+		}
+		if(F_set==1)
+		{ 
+			if(!Up_key) 
+			{
+				hour++;Fix_time(); delay(10000);
+			}
+			if(!Dw_key) 
+			{
+				hour--;Fix_time(); delay(10000);
+			}
+		}
+		if(F_set==2)
+		{ 
+			if(!Up_key) 
+			{
+				min++;Fix_time(); delay(10000);
+			}
+			if(!Dw_key) 
+			{	
+				min--;Fix_time(); delay(10000);
+			}
+		}
+		if(F_set==3)
+		{ 
+			if(!Up_key) 
+			{
+				sec++;Fix_time(); delay(10000);
+			}
+			if(!Dw_key) 
+			{	
+				sec--;Fix_time(); delay(10000);
+			}
+		}
+		
+	}
+
+ //******************** Neu nhan nut Alarm - Hen gio *************
+	if(!Alarm)
+	{
+		bip(); Display=1;// Keu tieng Bip và bat hien thi hen gio
+	}
+//***************************************************************
+	if(Display==1)// Neu hien thi hen gio bat 00 - 00
+	{
+		if(!Set_key)
+		{ 
+			bip();while(!Set_key); alarm++; 
+			if(alarm==4) 
+			{		
+				alarm=0;
+				Write_Alarm();
+			}
+		}
+		if(alarm==1)
+		{ 
+			if(!Up_key) //min++; 
+			{
+				a_hour++; delay(10000);
+			}
+			if(!Dw_key) //min--;
+			{
+				a_hour--; delay(10000);
+			}
+		}
+		if(alarm==2)
+		{ 
+			if(!Up_key) //hour++;
+			{
+				a_min++; delay(10000);
+			}
+			if(!Dw_key) //hour--;
+			{	
+				a_min--; delay(10000);
+			}
+		}
+		if(alarm==3)
+		{ 
+			if(!Up_key) //hour++;
+			{
+				on_off=1; delay(10000); 
+			}
+			if(!Dw_key) //hour--;
+			{	
+				on_off=0; delay(10000);
+			}
+		}
+		
+
+	}
+ Fix_time();	 //kiem tra tran so 
+delay(10000);
+}
+
+/********************/
+void T1_ISR(void) interrupt 3 // Dung ngat Timer1 de doc DS1307
+{ 
+TR1=0;
+TF1=0;
+TH1=0x3C;//29 // nap lai gia tri cho thanh ghi 15535
+TL1=0xAF;// 27 // Gia tri cho Timer0: 50000(us)x10=0.5(s)
+time++;	
+if(time==10)
+{time=0; B_nhay++; get_t=1;
+if(B_nhay==2)
+B_nhay=0;
+}
+TR1=1;
+}
+
+	
+/*************************************/
+void T0_ISR(void) interrupt 1	 // Dung ngat timer 0 de quet led
+{
+TR0=0;
+TF0=0;
+TH0=0xfc;//-1000/256; // Nap lai gia tri cho thanh ghi 
+TL0=0x18;//-1000%256;
+if(Display==0)
+	{
+index++;
+//giay
+if(index==1)	
+{	
+if(F_set==3 && B_nhay==1){index++;	index++;}
+else
+{
+t_view=sec; //sec;
+P0=0xff;
+P2&=0x03;
+P2|=0x04;//00100000
+P0=led7_data[t_view%10];	}}	//lay so du sau khi chia 10
+
+if(index==2) 
+{ 
+P0=0xff;
+P2&=0x03;
+P2|=0x08;//00100000
+P0=led7_data[t_view/10]; } //xuat gia tri hang chuc
+//phut
+if(index==3){
+if(F_set==2 && B_nhay==1){index++;	index++;}
+else
+{	t_view=min;
+P0=0xff;
+P2&=0x03;
+P2|=0x10;//00100000
+P0=led7_data[t_view%10];	}}
+
+if(index==4)
+{ P0=0xff;
+P2&=0x03;
+P2|=0x20;//00100000
+P0=led7_data[t_view/10];	} 
+//gio
+if(index==5) {
+if(F_set==1 && B_nhay==1){index=0;}
+else
+{ t_view=hour;
+P0=0xff;
+P2&=0x03;
+P2|=0x40;//00100000
+P0=led7_data[t_view%10];	} }
+
+if(index==6)
+{ 
+P0=0xff;
+P2&=0x03;
+P2|=0x80;//00100000
+P0=led7_data[t_view/10]; 
+index=0;	 } 
+}
+//*************************CHUONG TRINH HIEN THI HEN GIO**********************
+if(Display==1)
+	{
+		index++;
+		if(index==1)// Hien thi Hen gio
+		{
+			if(alarm==1 && B_nhay==1){ index++; index++; }
+			else
+			{
+				Data=a_hour;
+				P0=0xff;
+				P2&=0x03;
+				P2|=0x40;
+				P0=led7_data[Data%10];
+			}
+		}
+		if(index==2)
+		{
+			P0=0xff;
+				P2&=0x03;
+				P2|=0x80;
+			P0=led7_data[Data/10];
+		}
+		if(index==3)// Hen phut
+		{
+			if(alarm==2 && B_nhay==1){ index++; index++; }
+			else
+			{
+				Data=a_min;
+				
+				P0=0xff;
+				P2&=0x03;
+				P2|=0x10;
+				P0=led7_data[Data%10];
+			}
+		}
+		if(index==4)
+		{
+			
+			P0=0xff;
+				P2&=0x03;
+				P2|=0x20;
+			P0=led7_data[Data/10];
+		}
+	   	if(index==5)// Hien thi che do on - off	Hen gio
+		{
+			if(alarm==3 && B_nhay==1){ index=0; }
+			else
+			{
+				
+				P2=0xff;
+				if(on_off==1)
+				{ P2&=0x03;
+					P2|=0x04; //00100000 - Hang Don vi
+					P0=0x00;// sang het 2 led giay -So 8	
+				}
+				else 
+				{ P2&=0x03;
+					P2|=0x08;//00010000 - Hang chuc
+					P0=0xff; // tat het 2 led giay
+				}
+			}
+			index=0;
+		}
+		
+	}
+TR0=1;	
+}
+/************CHUONG TRINH CHINH********************************************* **********************/
+void main()
+{
+set_main();
+time=index=0;
+hour=min=sec=0;
+F_set=get_t=0;
+setup_timer();
+//Read_Alarm();
+while(1)
+{ 
+	Keypad();
+if(hour>=12) PM=0; // Neu gio lon hon 12 là gio dem bat led PM
+		else PM=1;
+
+
+if(F_set==0)
+{ 
+if(get_t == 1)
+{	
+get_t = 0;	   
+Read_DS1307();// Doc gia tri trong DS1307
+}
+}
+ 
+
+/*if((F_set==0)&&(get_t==1))
+		{
+				get_t = 0;
+				Read_DS1307();// Doc gia tri trong DS1307
+		} */
+// Neu hen gio = gio và hen phut bang phut thi keu bip bip
+if(((a_min==min)&&(a_hour==hour)))	   //&&(on_off==1)
+		{
+		if(sec<59) { bip(); delay(1000);}// Thoi gian tre cho hen gio
+			//else 
+			//on_off=0; 
+		}
+
+
+
+}
+}
