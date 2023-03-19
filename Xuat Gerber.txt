@@ -1,0 +1,48 @@
+Bây giờ các bạn cùng mở Altium lên và thực hiện ngay nào.
++ Bước 1:
+ Để khởi động Altium ta vào Start / All programs /AltiumDesign.
+ Sau đó chọn file cần mở. Vào file / open.
++ Bước 2:
+ Đặt gốc cho bản mạch
+Thao tác Edit / Origin / Set
+Sau đó Click dấu chữ thập vào vị trí cần đặt điểm gốc.
+Sau khi chọn điểm gốc xong ta tiến hành xuất file gerber và file khoan.
++ Bước 3:
+ Xuất file gerber:
+Thao tác: File / Fabrication Outputs / Gerber File
+Ta có cửa sổ Gerber Setup.
++ Bước 4:
+ Chọn sang thẻ Layers. Tại đây ta có thể chọn các lớp ta cần chuyển đổi.
+Click vào General 
+Units / millimeters
+Format / 4:4
+Click vào layers chọn các layers cần xuất.
+
+-GTL: Là lớp trên
+
+-GBL: Là lớp dưới
+
+-GTS: Là lớp mặt nạ hàn trên
+
+-GBS: Là lớp mặt nạ hàn dưới
+
+-GTO: Là lớp ký hiệu linh kiện mặt trên
+
+-GBO: Là lớp ký hiệu linh kiện mặt dưới.
+
+-GKO: Là lớp ký hiệu đường cut bo mạch
+
+Tiếp theo các bạn click vào Advanced.
+Chọn Use software arcs.
+Sau khi đã chọn xong ta nhấn OK. Như vậy là ta đã xuất thành công.
+
+Bước 5: 
+ Xuất file khoan.
+Thao tác: File / Fabrication Outputs / NC Drill Files
+Cửa sổ NC Drill Setup hiện ra:
+Các lựa chọn:
+-Units: Chọn là milimeters 
+-Format: Chọn 4:4 
+-Các thuộc tính khác giữ nguyên sau đó nhấn OK.
+Như vậy là ta đã hoàn thành xuất các file từ Altium sang Gerber để sử dụng.
+Các bạn vào file đã lưu lúc đầu sẽ thấy gerber ở đó.
