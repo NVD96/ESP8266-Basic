@@ -1,0 +1,19 @@
+#include <ArduinoUniqueID.h>
+
+void setup()
+{
+Serial.begin(9600);
+UniqueIDdump(Serial);
+Serial.print(“Serial Unique ID: “);
+for (size_t i = 0; i < UniqueIDsize; i++)
+{
+if (UniqueID[i] < 0x10)
+Serial.print(“0”);
+Serial.print(UniqueID[i], HEX);
+Serial.print(“ “);
+}
+}
+
+void loop() {
+
+}
