@@ -1,0 +1,118 @@
+/* Test na RSSI */
+byte AUX_PIN=2;
+byte M0_PIN =3;
+byte M1_PIN =4;
+enum MODE_TYPE
+{
+MODE_0_NORMAL = 0,
+MODE_1_WAKE_UP,
+MODE_2_POWER_SAVIN,
+MODE_3_SLEEP = 0xFF
+};
+void setup() {
+Serial.begin(9600);
+Serial1.begin(9600);
+while(!Serial){}
+delay(100);
+pinMode(M0_PIN, OUTPUT);
+pinMode(M1_PIN, OUTPUT);
+SwitchMode(MODE_3_SLEEP);
+triple_cmd(0xC3);// nazov, verzia
+Serial.print(“Info= “);Module_info(1);
+triple_cmd(0xF3);// nazov, verzia
+Serial.print(“Soft v.= “);Module_info(1);
+triple_cmd(0xE1);// nazov, verzia
+Serial.print(“Handsh= “);Module_info(1);
+triple_cmd(0xC5); 
+Serial.print(“Voltage= “);Module_info(2);
+triple_cmd(0xC1);
+Serial.print(“Konf= “);Module_info(3);
+sixple_cmd(0xAF,0xAF,0x73,0x00,0xAF,0xF3);
+Serial.print(“RSSI a= “);Module_info(1);
+sixple_cmd(0xAF,0xAF,0x74,0x00,0xAF,0xF4);
+Serial.print(“RSSI g= “);Module_info(1);
+//SwitchMode(MODE_0_NORMAL);
+Serial.println(“******* OK ********”);
+}
+void loop() {
+sixple_cmd(0xAF,0xAF,0x74,0x00,0xAF,0xF4);
+Serial.print(“RSSI g= “);Module_info(1);
+delay(500);
+}
+//—————————————————-
+void triple_cmd(byte Tcmd){
+uint8_t CMD[3] = {Tcmd, Tcmd, Tcmd};
+Serial1.write(CMD, 3);
+delay(50);//need ti check
+}
+void sixple_cmd(byte a,byte b,byte c,byte d,byte e,byte f){
+uint8_t CMD[6] = {};
+Serial1.write(CMD, 6);
+delay(50);
+}
+void cleanUARTBuf(){
+bool IsNull = true;
+while (Serial1.available()){
+Serial1.read();
+}
+}
+void Module_info(int typeStr){
+uint8_t Readcnt, idx;
+Readcnt = Serial1.available();
+if (Readcnt > 0){
+if(typeStr==1){
+String input = Serial1.readString();
+Serial.print(input);
+}else if(typeStr==2){
+int inx = 0;
+byte incomingByte[2];
+while( Serial1.available( ) ){
+incomingByte[inx++] = Serial1.read();
+}
+Serial.print((float)((incomingByte[1] << 8) | incomingByte[2])/1000);Serial.print(“Volts”);Serial.println();
+}else{
+while( Serial1.available( ) ){
+byte incoming = Serial1.read();
+Serial.print(“0x”);Serial.print(incoming,HEX);Serial.print(” ,”);
+}
+Serial.println(“”);
+}
+}else{
+Serial.print(” nemam data “);
+cleanUARTBuf();
+}
+}
+void SwitchMode(MODE_TYPE mode)
+{
+WaitAUX_H();
+switch (mode)
+{
+case MODE_0_NORMAL:
+digitalWrite(M0_PIN, LOW);
+digitalWrite(M1_PIN, LOW);
+Serial.println(“General working mode”);
+break;
+case MODE_1_WAKE_UP:
+digitalWrite(M0_PIN, HIGH);
+digitalWrite(M1_PIN, LOW);
+Serial.println(“Wake up mode”);
+break;
+case MODE_2_POWER_SAVIN:
+digitalWrite(M0_PIN, LOW);
+digitalWrite(M1_PIN, HIGH);
+Serial.println(“Power saving mode”);
+break;
+case MODE_3_SLEEP:
+digitalWrite(M0_PIN, HIGH);
+digitalWrite(M1_PIN, HIGH);
+Serial.println(“Sleep mode”);
+break;
+default:
+return ;
+}
+void WaitAUX_H(){
+while((digitalRead(AUX_PIN)==LOW)) {
+Serial.print(“.”);
+delay(100);
+}
+}
